@@ -3,6 +3,7 @@ class ChoreHelperCard extends HTMLElement {
     // Default configuration options
     this.config = {
       title: 'Chores',
+      show_today: true,
       show_overdue: true,
       show_future: 7, // Number of days into the future to display chores
       ...config, // Allow overriding via user configuration
@@ -85,6 +86,8 @@ class ChoreHelperCard extends HTMLElement {
     const filteredChores = chores.filter((chore) => {
       const state = chore.state;
     
+      if (this.config.show_today && state == 0) return true;
+
       // Include overdue chores if show_overdue is enabled
       if (this.config.show_overdue && state < 0) {
         return true;
@@ -105,22 +108,12 @@ class ChoreHelperCard extends HTMLElement {
     
 
     filteredChores.sort((a, b) => {
-      const dueDateA = new Date(a.attributes.due_date || a.state);
-      const dueDateB = new Date(b.attributes.due_date || b.state);
       const stateA = parseInt(a.state, 10);
       const stateB = parseInt(b.state, 10);
     
-      // Overdue chores first
-      if (dueDateA < now && dueDateB >= now) return -1;
-      if (dueDateA >= now && dueDateB < now) return 1;
-    
-      // Chores with state 0 next
-      if (stateA === 0 && stateB !== 0) return -1;
-      if (stateA !== 0 && stateB === 0) return 1;
-    
-      // Sort remaining by state (ascending order)
-      return stateA - stateB;
+      return stateA - stateB; // Sort by state in ascending order
     });
+    
     
 
     if (filteredChores.length === 0) {
