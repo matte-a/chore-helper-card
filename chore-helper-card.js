@@ -96,22 +96,26 @@ class ChoreHelperCard extends HTMLElement {
     // Filter chores based on config
     const now = new Date();
     const filteredChores = chores.filter((chore) => {
-      const dueDate = new Date(chore.attributes.due_date || chore.state);
-
-      if (this.config.show_overdue && dueDate < now) {
-        return true; // Include overdue chores
+      const state = chore.state;
+    
+      // Include overdue chores if show_overdue is enabled
+      if (this.config.show_overdue && state < 0) {
+        return true;
       }
-
+    
+      // Include future chores within the specified range
       if (
-        this.config.show_future &&
-        dueDate >= now &&
-        dueDate <= new Date(now.getTime() + this.config.show_future * 24 * 60 * 60 * 1000)
+        this.config.show_future > 0 &&
+        state > 0 &&
+        state <= this.config.show_future
       ) {
-        return true; // Include future chores within the specified range
+        return true;
       }
-
-      return false; // Exclude others
+    
+      // Exclude chores outside the range
+      return false;
     });
+    
 
     filteredChores.sort((a, b) => {
       const dueDateA = new Date(a.attributes.due_date || a.state);
@@ -133,7 +137,7 @@ class ChoreHelperCard extends HTMLElement {
     
 
     if (filteredChores.length === 0) {
-      this.content.innerHTML = `<p>No chores matching the criteria were found.</p>`;
+      this.content.innerHTML = `<h1 class="card-header">Chores</h1><div class="card-content"><p>No chores matching the criteria were found.</p></div>`;
       return;
     }
 
