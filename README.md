@@ -36,6 +36,7 @@ type: custom:chore-helper-card
 
 |Option|	Type|	Default|	Description|
 | -------- | ------- | -------- | ------- |
+|title|string|Chores|Add a custom title for your card|
 |show_overdue	|boolean	|true	|Show overdue chores at the top of the list.|
 |show_future	|integer	|7|	Number of days into the future to display chores. Set to 0 to hide future chores.|
 
@@ -46,3 +47,4 @@ type: custom:chore-helper-card
 show_overdue: true
 show_future: 3
 ```
+![image](https://github.com/user-attachments/assets/b17da0ba-47bf-4144-868f-a605b103684e)
