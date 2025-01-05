@@ -2,6 +2,7 @@ class ChoreHelperCard extends HTMLElement {
   setConfig(config) {
     // Default configuration options
     this.config = {
+      title: 'Chores',
       show_overdue: true,
       show_future: 7, // Number of days into the future to display chores
       ...config, // Allow overriding via user configuration
@@ -63,20 +64,6 @@ class ChoreHelperCard extends HTMLElement {
         .chore-due-date {
           font-size: 0.9em;
           color: var(--secondary-text-color);
-        }
-  
-        .mark-done-button {
-          background-color: var(--primary-color);
-          color: white;
-          border: none;
-          border-radius: 8px;
-          padding: 4px 12px;
-          cursor: pointer;
-          transition: background-color 0.3s;
-        }
-  
-        .mark-done-button:hover {
-          background-color: var(--primary-color-dark);
         }
       `;
       this.appendChild(style);
@@ -143,7 +130,7 @@ class ChoreHelperCard extends HTMLElement {
 
     // Render the list of chores with buttons
     this.content.innerHTML = `
-      <h1 class="card-header">Chores</h1>
+      <h1 class="card-header">${this.config.title}</h1>
       <div class="card-content">
         <ul>
         ${filteredChores
