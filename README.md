@@ -12,12 +12,13 @@ Shows chores for today and configurable future dates.
 
 Allows users to mark chores as complete directly from the card.
 
-## Installation
-Download the Card
-Copy the chore-helper-card.js file to your Home Assistant www directory.
+## Installation (HACS)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=isabellaalstrom&repository=chore-helper-card&category=plugin)
 
-### Add the Resource
-1. Add the following to your Home Assistant configuration.yaml or via the UI:
+## Installation (Manual)
+1. Download chore-helper-card.js
+2. Copy that up to your Home Assistant www directory.
+3. Add the following to your Home Assistant configuration.yaml or via the UI:
 
 ```yaml
 resources:
@@ -25,7 +26,7 @@ resources:
     type: module
 ```
 
-2. Add the Card to Your Dashboard
+## Add the Card to Your Dashboard
 In your dashboard, add a new manual card with the following configuration.
 
 ```yaml
