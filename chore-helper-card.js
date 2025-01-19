@@ -83,66 +83,85 @@ class ChoreHelperCard extends HTMLElement {
 
     // Filter chores based on config
     const now = new Date();
-    const filteredChores = chores.filter((chore) => {
-      const state = chore.state;
-    
-      if (this.config.show_today && state == 0) return true;
+    let filteredChores = [];
 
-      // Include overdue chores if show_overdue is enabled
-      if (this.config.show_overdue && state < 0) {
-        return true;
-      }
-    
-      // Include future chores within the specified range
-      if (
-        this.config.show_future > 0 &&
-        state > 0 &&
-        state <= this.config.show_future
-      ) {
-        return true;
-      }
-    
-      // Exclude chores outside the range
-      return false;
-    });
-    
+    if (this.config.show_all)
+      filteredChores = chores
+    else {
+
+      chores.filter((chore) => {
+        const state = chore.state;
+
+        if (this.config.show_today && state == 0) return true;
+
+        // Include overdue chores if show_overdue is enabled
+        if (this.config.show_overdue && state < 0) {
+          return true;
+        }
+
+        // Include future chores within the specified range
+        if (
+          this.config.show_future > 0 &&
+          state > 0 &&
+          state <= this.config.show_future
+        ) {
+          return true;
+        }
+
+        // Exclude chores outside the range
+        return false;
+      });
+
+    }
 
     filteredChores.sort((a, b) => {
       const stateA = parseInt(a.state, 10);
       const stateB = parseInt(b.state, 10);
-    
+
       return stateA - stateB; // Sort by state in ascending order
     });
-    
-    
+
+
+    const title = this.config.title ? `<h1 class="card-header">${this.config.title}</h1>` : "";
 
     if (filteredChores.length === 0) {
-      this.content.innerHTML = `<h1 class="card-header">Chores</h1><div class="card-content"><p>No chores matching the criteria were found.</p></div>`;
+      this.content.innerHTML = `${title}<div class="card-content"><p>No chores matching the criteria were found.</p></div>`;
       return;
     }
 
     // Render the list of chores with buttons
+
     this.content.innerHTML = `
-      <h1 class="card-header">${this.config.title}</h1>
+     ${title}
       <div class="card-content">
         <ul>
         ${filteredChores
-          .map(
-            (chore) => `
-          <li>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span><strong>${chore.attributes.friendly_name}:</strong> ${this._render_due(chore.state)}</span>
-                <mwc-icon-button class="track-button"
-                                .label="Track"
-                                data-entity="${chore.entity_id}"}
-                                >
-                    <ha-icon class="track-button-icon" icon='mdi:check-circle-outline'></ha-icon>
-                </mwc-icon-button>
-            </div>
-          </li>
-        `
-          )
-          .join("")}
+        .map(
+          (chore) => {
+
+            return `
+              <li>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>
+                 <ha-icon icon="${chore.attributes.icon}"
+                style="width: 20px; height: 20px;">
+                </ha-icon>
+                  <strong>${chore.attributes.friendly_name}:</strong> ${this._render_due(chore.state)}</span>
+
+          ${this.config.show_future > chore.state ? `
+                    <mwc-icon-button class="track-button"
+                                    .label="Track"
+                                    data-entity="${chore.entity_id}"}
+                                    >
+                        <ha-icon class="track-button-icon" icon='mdi:check-circle-outline'></ha-icon>
+                    </mwc-icon-button>
+                    `: ""}
+                </div>
+              </li>
+            `
+          }
+        )
+        .join("")}
         </ul>
       </div>
 
@@ -165,17 +184,16 @@ class ChoreHelperCard extends HTMLElement {
   }
 
   _render_due(state) {
-    if(state == 0){
+    if (state == 0) {
       return "Today";
     }
-    else if (state == 1){
+    else if (state == 1) {
       return "1 day";
     }
     else if (state > 1) {
       return state + " days";
     }
-    else if (state < 0)
-    {
+    else if (state < 0) {
       return state + " day(s).";
     }
   }
