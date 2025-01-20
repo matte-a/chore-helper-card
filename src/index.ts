@@ -123,51 +123,13 @@ class ChoreHelperCard extends LitElement {
           list-style: none;
           padding: 0;
         }
-        ha-card {
-          padding: 16px;
-          font-family: Arial, sans-serif;
-        }
-  
-        .header {
-          font-size: 1.5em;
-          margin: 0 0 16px;
-          color: var(--primary-text-color);
-        }
-  
-        .card-content {
+       
+        .card-content ul {
           display: flex;
           flex-direction: column;
           gap: 16px;
         }
-  
-        .chore-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background: var(--card-background-color);
-          padding: 8px 16px;
-          border-radius: 8px;
-          border: 1px solid var(--divider-color);
-        }
-  
-        .chore-item.overdue {
-          border-color: var(--error-color);
-        }
-  
-        .chore-info {
-          display: flex;
-          flex-direction: column;
-        }
-  
-        .chore-name {
-          font-size: 1.2em;
-          font-weight: bold;
-        }
-  
-        .chore-due-date {
-          font-size: 0.9em;
-          color: var(--secondary-text-color);
-        }
+
     `;
     }
 
