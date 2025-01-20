@@ -5,8 +5,7 @@
     "description": "A card to rendere chores",
     "main": "src/index.ts",
     "scripts": {
-        "build": "webpack",
-        "build2": "tsc && rollup -c",
+        "build": "tsc && rollup -c",
         "start": "node dist/index.js"
     },
     "author": "",

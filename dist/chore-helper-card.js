@@ -79,15 +79,15 @@ class ChoreHelperCard extends r {
                             </ha-icon>
                             <strong>${chore.attributes.friendly_name}:</strong> ${this._render_due(state)}</span>
 
-                    ${this.config.show_future > state ? `
+                    ${this.config.show_future > state ? x `
                                 <mwc-icon-button class="track-button"
                                                 .label="Track"
-                                                @change="${() => this._markChoreAsCompleted(chore.entity_id)}"
+                                                @click="${() => this._markChoreAsCompleted(chore.entity_id)}"
                                                 data-entity="${chore.entity_id}"}
                                                 >
                                     <ha-icon class="track-button-icon" icon='mdi:check-circle-outline'></ha-icon>
                                 </mwc-icon-button>
-                                ` : ""}
+                                ` : x ``}
                             </div>
                         </li>
                         `;
