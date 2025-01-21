@@ -61,44 +61,39 @@ class ChoreHelperCard extends r {
         });
         const title = this.config.title ? `<h1 class="card-header">${this.config.title}</h1>` : "";
         if (filteredChores.length === 0) {
-            return x `${title}<div class="card-content"><p>No chores matching the criteria were found.</p></div>`;
+            return x `<div class="card-content">${title}<p>No chores matching the criteria were found.</p></div>`;
         }
         return x `
+            <div class="card-content">
                 ${title}
-                <div class="card-content">
                     <ul>
-                    ${filteredChores
-            .map((chore) => {
+                    ${filteredChores.map((chore) => {
             const state = parseInt(chore.state);
             return x `
                         <li>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>
-                            <ha-icon icon="${chore.attributes.icon}"
-                            style="width: 20px; height: 20px;">
-                            </ha-icon>
-                            <strong>${chore.attributes.friendly_name}:</strong> ${this._render_due(state)}</span>
+                            <ha-icon class="icon" icon="${chore.attributes.icon}"style="width: 20px; height: 20px;"></ha-icon>
+                            <strong class="name">${chore.attributes.friendly_name}</strong> 
+                            <span class="state">${this._render_due(state)}</span>
 
-                    ${this.config.show_future > state ? x `
-                                <mwc-icon-button class="track-button"
-                                                .label="Track"
+                        ${this.config.show_future > state ? x `
+                                <div class="button"
                                                 @click="${() => this._markChoreAsCompleted(chore.entity_id)}"
-                                                data-entity="${chore.entity_id}"}
                                                 >
                                     <ha-icon class="track-button-icon" icon='mdi:check-circle-outline'></ha-icon>
-                                </mwc-icon-button>
+                                </div>
                                 ` : x ``}
-                            </div>
                         </li>
-                        `;
-        })}
+                    `;
+        })}   
                     </ul>
-                </div>
-
-         `;
+            </div>
+        `;
     }
     static get styles() {
         return i$3 `
+        .card-content{
+            padding: 16px;
+        }
          ul {
           list-style: none;
           padding: 0;
@@ -108,6 +103,21 @@ class ChoreHelperCard extends r {
           display: flex;
           flex-direction: column;
           gap: 16px;
+        }
+          .card-content ul li{
+            display: flex; 
+            justify-content: space-between; 
+            align-items: baseline;
+          }
+        .card-content ul li .icon{
+        flex:0 0 40px;
+        }
+        .card-content ul li .name{
+            flex:1 1 30%;
+        }
+        .card-content ul li .button{
+            cursor:pointer;
+            margin-left:20px;
         }
 
     `;

@@ -1,4 +1,5 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+// import terser from '@rollup/plugin-terser';
 
 export default {
     input: "lib/index.js",
@@ -8,5 +9,12 @@ export default {
             format: "cjs",
         },
     ],
-    plugins: [nodeResolve()]
+    plugins: [
+        nodeResolve(),
+        // terser({
+        //     compress: {
+        //         warnings: false,
+        //     },
+        // }),
+    ]
 };
