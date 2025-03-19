@@ -27,19 +27,34 @@ const t=globalThis,i$1=t.trustedTypes,s=i$1?i$1.createPolicy("lit-html",{createH
  */class r extends b{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=undefined;}createRenderRoot(){const t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){const s=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=B(s,this.renderRoot,this.renderOptions);}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(true);}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(false);}render(){return T}}r._$litElement$=true,r["finalized"]=true,globalThis.litElementHydrateSupport?.({LitElement:r});const i=globalThis.litElementPolyfillSupport;i?.({LitElement:r});(globalThis.litElementVersions??=[]).push("4.1.1");
 
 class ChoreHelperCard extends r {
+    constructor() {
+        super();
+        this._status = "";
+        this._chores = [];
+        this._status = "";
+    }
     setConfig(config) {
         this.config = Object.assign({ title: 'Chores', show_today: true, show_overdue: true, show_future: 7 }, config);
     }
+    set hass(hass) {
+        this._hass = hass;
+        let chores = Object.values(hass.states).filter((entity) => entity.attributes.device_class === "chore_helper__schedule", this);
+        let state = chores
+            .map(a => a.state + "").join("");
+        if (state !== this._status) {
+            this._chores = chores;
+            this._status = state;
+        }
+    }
     render() {
-        const chores = Object.values(this.hass.states).filter((entity) => entity.attributes.device_class === "chore_helper__schedule", this);
-        if (chores.length === 0) {
+        if (!this._chores || this._chores.length === 0) {
             return x `<p>No chores found.</p>`;
         }
         let filteredChores = [];
         if (this.config.show_all)
-            filteredChores = chores;
+            filteredChores = this._chores;
         else {
-            chores.filter((chore) => {
+            this._chores.filter((chore) => {
                 const state = parseInt(chore.state);
                 if (this.config.show_today && state == 0)
                     return true;
@@ -124,7 +139,7 @@ class ChoreHelperCard extends r {
     }
     _markChoreAsCompleted(entityId) {
         console.log("Mark as complete: " + entityId);
-        this.hass.callService("chore_helper", "complete", {
+        this._hass.callService("chore_helper", "complete", {
             entity_id: entityId,
         });
     }
@@ -146,4 +161,7 @@ class ChoreHelperCard extends r {
         return 3;
     }
 }
+ChoreHelperCard.properties = {
+    _status: { type: String }
+};
 customElements.define("chore-helper-card", ChoreHelperCard);

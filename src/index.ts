@@ -5,8 +5,22 @@ import type { HassEntity } from 'home-assistant-js-websocket';
 import { LitElement, css, html } from "lit-element";
 import type { ConfigDefaultType, ConfigType } from "./types/Config.type";
 class ChoreHelperCard extends LitElement {
-    private declare hass: HomeAssistant;
+
+    private declare _hass: HomeAssistant;
     private declare config: ConfigType;
+    private _status: string = "";
+    private _chores: HassEntity[] = [];
+
+
+    static properties = {
+        _status: { type: String }
+    };
+
+    constructor() {
+        super();
+        this._status = "";
+    }
+
     public setConfig(config: ConfigDefaultType) {
 
         // Default configuration options
@@ -19,15 +33,25 @@ class ChoreHelperCard extends LitElement {
         };
     }
 
+    public set hass(hass: HomeAssistant) {
+        this._hass = hass;
+        let chores = Object.values(hass.states).filter((entity) => entity.attributes.device_class === "chore_helper__schedule", this)
+        let state = chores
+            .map(a => a.state + "").join("");
+
+        if (state !== this._status) {
+            this._chores = chores;
+            this._status = state;
+        }
+
+    }
     public render() {
 
 
         // Filter entities with device_class: chore_helper__schedule
-        const chores: HassEntity[] = Object.values(this.hass.states).filter(
-            (entity) => entity.attributes.device_class === "chore_helper__schedule"
-            , this);
 
-        if (chores.length === 0) {
+
+        if (!this._chores || this._chores.length === 0) {
             return html`<p>No chores found.</p>`;
         }
 
@@ -35,10 +59,10 @@ class ChoreHelperCard extends LitElement {
         let filteredChores: HassEntity[] = [];
 
         if (this.config.show_all)
-            filteredChores = chores
+            filteredChores = this._chores
         else {
 
-            chores.filter((chore) => {
+            this._chores.filter((chore) => {
                 const state = parseInt(chore.state);
 
                 if (this.config.show_today && state == 0) return true;
@@ -144,7 +168,7 @@ class ChoreHelperCard extends LitElement {
 
     _markChoreAsCompleted(entityId: string) {
         console.log("Mark as complete: " + entityId)
-        this.hass.callService("chore_helper", "complete", {
+        this._hass.callService("chore_helper", "complete", {
             entity_id: entityId,
         });
     }
