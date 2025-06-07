@@ -150,6 +150,9 @@ class ChoreHelperCard extends LitElement {
             display: flex; 
             justify-content: space-between; 
             align-items: baseline;
+            background-color:black;
+            border-radius:25px;
+            padding:12px;
           }
         .card-content ul li .icon{
         flex:0 0 40px;
