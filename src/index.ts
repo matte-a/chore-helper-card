@@ -144,7 +144,8 @@ class ChoreHelperCard extends LitElement {
         .card-content ul {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: 10px;
+          margin:0;
         }
           .card-content ul li{
             display: flex; 
