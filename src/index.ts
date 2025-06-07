@@ -151,7 +151,7 @@ class ChoreHelperCard extends LitElement {
             display: flex; 
             justify-content: space-between; 
             align-items: baseline;
-            background-color:black;
+            background-color:var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)));
             border-radius:25px;
             padding:12px;
           }
