@@ -150,13 +150,19 @@ class ChoreHelperCard extends LitElement {
           .card-content ul li{
             display: flex; 
             justify-content: space-between; 
-            align-items: baseline;
+            align-items: center;
             background-color:var(--bubble-main-background-color, var(--background-color-2, var(--secondary-background-color)));
             border-radius:25px;
-            padding:12px;
+            padding: 5px 12px;
+            gap: 10px;
           }
         .card-content ul li .icon{
-        flex:0 0 40px;
+            flex:0 0 40px;
+            border-radius: 45px;
+            padding: 10px 0;
+            display: flex;
+            background-color: var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
+            justify-content:center;
         }
         .card-content ul li .name{
             flex:1 1 30%;
