@@ -155,6 +155,7 @@ class ChoreHelperCard extends LitElement {
             border-radius:25px;
             padding: 5px 12px;
             gap: 10px;
+            z-index:1;
           }
         .card-content ul li .icon{
             flex:0 0 40px;
