@@ -9,6 +9,7 @@ export default {
             format: "cjs",
         },
     ],
+    context: 'window', // Add this line to silence the warning
     plugins: [
         nodeResolve(),
         // terser({

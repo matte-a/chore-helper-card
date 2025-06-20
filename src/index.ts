@@ -3,7 +3,9 @@ import type { HomeAssistant, } from 'custom-card-helpers';
 
 import type { HassEntity } from 'home-assistant-js-websocket';
 import { LitElement, css, html } from "lit-element";
+import "./ChoreHelperItem";
 import type { ConfigDefaultType, ConfigType } from "./types/Config.type";
+
 class ChoreHelperCard extends LitElement {
 
     private declare _hass: HomeAssistant;
@@ -11,6 +13,7 @@ class ChoreHelperCard extends LitElement {
     private _status: string = "";
     private _chores: HassEntity[] = [];
 
+    private _loadingChores: Set<string> = new Set();
 
     static properties = {
         _status: { type: String }
@@ -42,6 +45,13 @@ class ChoreHelperCard extends LitElement {
         if (state !== this._status) {
             this._chores = chores;
             this._status = state;
+            chores.forEach((c) => {
+
+                if (this._loadingChores.has(c.entity_id) && +c.state === 0) {
+                    this._loadingChores.delete(c.entity_id);
+                }
+            })
+
         }
 
     }
@@ -109,21 +119,16 @@ class ChoreHelperCard extends LitElement {
                     <ul>
                     ${filteredChores.map((chore) => {
             const state = parseInt(chore.state);
-            return html`
-                        <li>
-                            <ha-icon class="icon" icon="${chore.attributes.icon}"style="width: 20px; height: 20px;"></ha-icon>
-                            <strong class="name">${chore.attributes.friendly_name}</strong> 
-                            <span class="state">${this._render_due(state)}</span>
-
-                        ${this.config.show_future > state ? html`
-                                <div class="button"
-                                                @click="${() => this._markChoreAsCompleted(chore.entity_id)}"
-                                                >
-                                    <ha-icon class="track-button-icon" icon='mdi:check-circle-outline'></ha-icon>
-                                </div>
-                                `: html``}
-                        </li>
-                    `
+            return html`<li>
+                        <chore-helper-item
+                            .chore="${chore}"
+                            .state="${state}"
+                            .show_future="${this.config.show_future}"
+                            .loading="${this._loadingChores.has(chore.entity_id)}"
+                            @chore-complete="${(e: CustomEvent) => this._markChoreAsCompleted(e.detail.entityId)}"
+                        ></chore-helper-item>
+                    </li>
+                    `;
         })
             }   
                     </ul>
@@ -148,6 +153,9 @@ class ChoreHelperCard extends LitElement {
           margin:0;
         }
           .card-content ul li{
+            z-index:1;
+          }
+          .card-content ul li chore-helper-item{
             display: flex; 
             justify-content: space-between; 
             align-items: center;
@@ -157,7 +165,7 @@ class ChoreHelperCard extends LitElement {
             gap: 10px;
             z-index:1;
           }
-        .card-content ul li .icon{
+        .card-content ul li chore-helper-item .icon{
             flex:0 0 40px;
             border-radius: 45px;
             padding: 10px 0;
@@ -165,23 +173,42 @@ class ChoreHelperCard extends LitElement {
             background-color: var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
             justify-content:center;
         }
-        .card-content ul li .name{
+        .card-content ul li chore-helper-item .name{
             flex:1 1 30%;
         }
-        .card-content ul li .button{
+        .card-content ul li chore-helper-item .button{
             cursor:pointer;
             margin-left:20px;
         }
-
+     .button {
+        cursor: pointer;
+        margin-left: 20px;
+      }
+      .loader {
+        display:block;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #555;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg);}
+        100% { transform: rotate(360deg);}
+      }
     `;
     }
 
 
     _markChoreAsCompleted(entityId: string) {
-        console.log("Mark as complete: " + entityId)
+        if (this._loadingChores.has(entityId)) return;
+        this._loadingChores.add(entityId);
+        this.requestUpdate();
         this._hass.callService("chore_helper", "complete", {
             entity_id: entityId,
-        });
+        })
     }
 
     _render_due(state: number) {

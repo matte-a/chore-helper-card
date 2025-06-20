@@ -26,11 +26,79 @@ const t=globalThis,i$1=t.trustedTypes,s=i$1?i$1.createPolicy("lit-html",{createH
  * SPDX-License-Identifier: BSD-3-Clause
  */class r extends b{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=undefined;}createRenderRoot(){const t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){const s=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=B(s,this.renderRoot,this.renderOptions);}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(true);}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(false);}render(){return T}}r._$litElement$=true,r["finalized"]=true,globalThis.litElementHydrateSupport?.({LitElement:r});const i=globalThis.litElementPolyfillSupport;i?.({LitElement:r});(globalThis.litElementVersions??=[]).push("4.1.1");
 
+var __awaiter = (window && window.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+class ChoreHelperItem extends r {
+    constructor() {
+        super(...arguments);
+        this.state = 0;
+        this.loading = false;
+        this.show_future = 0;
+    }
+    createRenderRoot() {
+        return this;
+    }
+    render() {
+        return x `
+
+            <ha-icon class="icon" icon="${this.chore.attributes.icon}" style="width: 20px; height: 20px;"></ha-icon>
+            <strong class="name">${this.chore.attributes.friendly_name}</strong>
+            <span class="state">${this._renderDue(this.state)}</span>
+             ${this.show_future > this.state ? x `<div class="button"
+                @click="${this._onComplete}"
+                style="pointer-events: ${this.loading ? 'none' : 'auto'}; opacity: ${this.loading ? 0.5 : 1};"
+            >
+              ${this.loading
+            ? x `<span class="loader"></span>`
+            : x `<ha-icon class="track-button-icon" icon='mdi:check-circle-outline'></ha-icon>`}
+            </div>` : x ``}
+
+        `;
+    }
+    _renderDue(state) {
+        if (state == 0)
+            return "Today";
+        if (state == 1)
+            return "1 day";
+        if (state > 1)
+            return state + " days";
+        if (state < 0)
+            return state + " day(s).";
+    }
+    _onComplete() {
+        return __awaiter(this, undefined, undefined, function* () {
+            if (this.loading)
+                return;
+            this.loading = true;
+            this.dispatchEvent(new CustomEvent('chore-complete', {
+                detail: { entityId: this.chore.entity_id },
+                bubbles: true,
+                composed: true,
+            }));
+        });
+    }
+}
+ChoreHelperItem.properties = {
+    chore: { type: Object },
+    state: { type: Number },
+    loading: { type: Boolean },
+    show_future: { type: Number },
+};
+customElements.define("chore-helper-item", ChoreHelperItem);
+
 class ChoreHelperCard extends r {
     constructor() {
         super();
         this._status = "";
         this._chores = [];
+        this._loadingChores = new Set();
         this._status = "";
     }
     setConfig(config) {
@@ -44,6 +112,11 @@ class ChoreHelperCard extends r {
         if (state !== this._status) {
             this._chores = chores;
             this._status = state;
+            chores.forEach((c) => {
+                if (this._loadingChores.has(c.entity_id) && +c.state === 0) {
+                    this._loadingChores.delete(c.entity_id);
+                }
+            });
         }
     }
     render() {
@@ -84,20 +157,15 @@ class ChoreHelperCard extends r {
                     <ul>
                     ${filteredChores.map((chore) => {
             const state = parseInt(chore.state);
-            return x `
-                        <li>
-                            <ha-icon class="icon" icon="${chore.attributes.icon}"style="width: 20px; height: 20px;"></ha-icon>
-                            <strong class="name">${chore.attributes.friendly_name}</strong> 
-                            <span class="state">${this._render_due(state)}</span>
-
-                        ${this.config.show_future > state ? x `
-                                <div class="button"
-                                                @click="${() => this._markChoreAsCompleted(chore.entity_id)}"
-                                                >
-                                    <ha-icon class="track-button-icon" icon='mdi:check-circle-outline'></ha-icon>
-                                </div>
-                                ` : x ``}
-                        </li>
+            return x `<li>
+                        <chore-helper-item
+                            .chore="${chore}"
+                            .state="${state}"
+                            .show_future="${this.config.show_future}"
+                            .loading="${this._loadingChores.has(chore.entity_id)}"
+                            @chore-complete="${(e) => this._markChoreAsCompleted(e.detail.entityId)}"
+                        ></chore-helper-item>
+                    </li>
                     `;
         })}   
                     </ul>
@@ -121,6 +189,9 @@ class ChoreHelperCard extends r {
           margin:0;
         }
           .card-content ul li{
+            z-index:1;
+          }
+          .card-content ul li chore-helper-item{
             display: flex; 
             justify-content: space-between; 
             align-items: center;
@@ -130,7 +201,7 @@ class ChoreHelperCard extends r {
             gap: 10px;
             z-index:1;
           }
-        .card-content ul li .icon{
+        .card-content ul li chore-helper-item .icon{
             flex:0 0 40px;
             border-radius: 45px;
             padding: 10px 0;
@@ -138,18 +209,38 @@ class ChoreHelperCard extends r {
             background-color: var(--bubble-button-icon-background-color, var(--bubble-icon-background-color, var(--bubble-secondary-background-color, var(--card-background-color, var(--ha-card-background)))));
             justify-content:center;
         }
-        .card-content ul li .name{
+        .card-content ul li chore-helper-item .name{
             flex:1 1 30%;
         }
-        .card-content ul li .button{
+        .card-content ul li chore-helper-item .button{
             cursor:pointer;
             margin-left:20px;
         }
-
+     .button {
+        cursor: pointer;
+        margin-left: 20px;
+      }
+      .loader {
+        display:block;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #555;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg);}
+        100% { transform: rotate(360deg);}
+      }
     `;
     }
     _markChoreAsCompleted(entityId) {
-        console.log("Mark as complete: " + entityId);
+        if (this._loadingChores.has(entityId))
+            return;
+        this._loadingChores.add(entityId);
+        this.requestUpdate();
         this._hass.callService("chore_helper", "complete", {
             entity_id: entityId,
         });
